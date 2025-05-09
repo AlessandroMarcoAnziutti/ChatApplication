@@ -11,7 +11,6 @@ public class ChatReplyMessage extends Message {
         this.recipient = recipient;
         this.messages = messages;
         this.id = 4;
-        timestamp = LocalDateTime.now();
     }
 
     public List<Message> getMessages() {

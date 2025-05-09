@@ -33,13 +33,17 @@ public class ServerSide implements ServerInterface {
         in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         Controller server = new Controller();
 
+        System.out.println("Creating message handler");
         MessageHandler messageHandler = new MessageHandler(server);
         Thread messageHandlerThread = new Thread(messageHandler);
         messageHandlerThread.start();
 
+        System.out.println("Waiting for messages...");
         while(true) {
             String message = in.readUTF();
+            System.out.println("message: " + message);
             Message mex = deserializer.deserialize(message);
+            System.out.println("message from " + mex.getSender());
             messageHandler.addMessage(mex);
         }
     }

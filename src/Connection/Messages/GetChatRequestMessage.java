@@ -8,6 +8,5 @@ public class GetChatRequestMessage extends Message {
         this.recipient = "Server";
         this.message = "";
         this.id = 3;
-        timestamp = LocalDateTime.now();
     }
 }

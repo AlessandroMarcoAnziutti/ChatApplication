@@ -8,6 +8,5 @@ public class ReplyMessage extends Message {
         this.recipient = recipient;
         this.message = message;
         this.id = 1;
-        timestamp = LocalDateTime.now();
     }
 }

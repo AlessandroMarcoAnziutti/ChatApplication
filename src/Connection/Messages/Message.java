@@ -15,7 +15,6 @@ public abstract class Message {
     String recipient;
     String message;
     int id;
-    LocalDateTime timestamp;
 
     public Message() {}
 
@@ -28,6 +27,4 @@ public abstract class Message {
     public int getId() { return id; }
 
     public String getRecipient() { return recipient; }
-
-    public LocalDateTime getTimestamp() { return timestamp; }
 }

@@ -9,6 +9,5 @@ public class LoginMessage extends Message {
         this.recipient = "Server";
         this.message = password;
         this.id = 0;
-        timestamp = LocalDateTime.now();
     }
 }

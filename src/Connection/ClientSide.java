@@ -44,18 +44,21 @@ public class ClientSide {
             String message = input.nextLine();
             List<String> messageSplit = Arrays.asList(message.split(" "));
             switch(messageSplit.getFirst()){
-                case "send": if(messageSplit.size() == 2){ clientController.textMessageManager(messageSplit); } break;
-                case "chat": if(messageSplit.size() == 1){ clientController.chatRequestManager(); } break;
-                case "login": if(messageSplit.size() == 3){ clientController.loginManager(messageSplit); } break;
-                case "show-chat": if(messageSplit.size() == 1){ if(!userLight.getChat().isEmpty()) printChat(userLight.getChat());} break;
+                case "send": if(messageSplit.size() == 3){ clientController.textMessageManager(messageSplit); } else System.out.println("Invalid message"); break;
+                case "chat": if(messageSplit.size() == 1){ clientController.chatRequestManager(); } else System.out.println("Invalid message"); break;
+                case "login": if(messageSplit.size() == 3){ clientController.loginManager(messageSplit); } else System.out.println("Invalid message"); break;
+                case "show-chat": if(messageSplit.size() == 1){ if(!userLight.getChat().isEmpty()) printChat(userLight.getChat());} else System.out.println("Invalid message"); break;
                 default: System.out.println("Invalid message"); break;
             }
         }
     }
 
     public void sendMessage(Message message) throws IOException {
-        out.writeObject(serializer.serialize(message));
+        String string = serializer.serialize(message);
+        System.out.println(string);
+        out.writeObject(string);
+        System.out.println("Message sent");
     }
 
-    private static void printChat(List<Message> messages) { for(Message message : messages){ System.out.println("<" + message.getTimestamp() + "> " + message.getSender() + " : " + message.getMessage() + "\n"); } }
+    private static void printChat(List<Message> messages) { for(Message message : messages){ System.out.println(message.getSender() + " : " + message.getMessage() + "\n"); } }
 }
