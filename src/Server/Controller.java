@@ -1,26 +1,23 @@
 package Server;
 
 import Connection.Messages.*;
-import Connection.ServerSide;
-import Interfaces.ControllerInterface;
 import Server.Model.User;
 import Server.Model.UserStatus;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.*;
 
-public class Controller implements ControllerInterface {
-    private List<User> users;
+public class Controller {
+    private Server server;
 
-    public Controller() {
-        users = new ArrayList<>();
+    public Controller(Server server) {
+        this.server = server;
     }
 
-    public void userManagement(LoginMessage message) throws IOException {
-        User user = new User(message.getSender(), message.getMessage());
-        if(!users.contains(user)){
-            users.add(user);
+    public void userManagement(String name, String password) throws IOException {
+        User user = new User(name, password);
+        if(!server.getUsers().contains(user)){
+            server.getUsers().add(user);
             reply(user.getUsername());
         } else {
             if(isLoginCorrect(user)){
@@ -30,46 +27,40 @@ public class Controller implements ControllerInterface {
         }
     }
 
-    public void chatRequestManagement(GetChatRequestMessage message) throws IOException {
-        User user = getUserFromUsers(message.getSender());
+    public void chatRequestManagement(String name) throws IOException {
+        User user = getUserFromUsers(name);
         if(user != null) { reply(user.getUsername(), user.getChat()); }
     }
 
-    public void textMessageManagement(TextMessage message) throws IOException {
-        User sender = getUserFromUsers(message.getSender());
-        if(sender != null) sender.receiveMessage(message);
-        User recipient = getUserFromUsers(message.getRecipient());
-        if(recipient != null) recipient.receiveMessage(message);
+    public void textMessageManagement(String ssender, String srecipient, String message) throws IOException {
+        User sender = getUserFromUsers(ssender);
+        if(sender != null) sender.receiveMessage(ssender, srecipient, message);
+        User recipient = getUserFromUsers(srecipient);
+        if(recipient != null) recipient.receiveMessage(ssender, srecipient, message);
 
-        reply(message);
+        send(ssender, srecipient, message);
     }
 
-    private Boolean isLoginCorrect(User user){ for(User us : users){ if(us.getUsername().equals(user.getUsername()) && us.getPassword().equals(user.getPassword())) return true; } return false; }
-    private User getUserFromUsers(String username){ for(User us : users){ if(us.getUsername().equals(username)) return us; } return null; }
+    private Boolean isLoginCorrect(User user){ for(User us : server.getUsers()){ if(us.getUsername().equals(user.getUsername()) && us.getPassword().equals(user.getPassword())) return true; } return false; }
+    private User getUserFromUsers(String username){ for(User us : server.getUsers()){ if(us.getUsername().equals(username)) return us; } return null; }
 
-    @Override
     public void reply(String user) throws IOException {
-        ServerSide serverSide = ServerSide.getInstance();
         ReplyMessage mex = new ReplyMessage("Server", user, "Login successful");
-        serverSide.sendMessage(mex);
+        server.sendMessage(mex);
     }
 
-    @Override
     public void reply(String user, boolean b) throws IOException {
-        ServerSide serverSide = ServerSide.getInstance();
         ReplyMessage mex = new ReplyMessage("Server", user, "Incorrect username or password");
-        serverSide.sendMessage(mex);
+        server.sendMessage(mex);
     }
 
-    @Override
     public void reply(String user, List<Message> messages) throws IOException {
-        ServerSide serverSide = ServerSide.getInstance();
         ChatReplyMessage mex = new ChatReplyMessage("Server", user, messages);
-        serverSide.sendMessage(mex);
+        server.sendMessage(mex);
     }
 
-    public void reply(TextMessage message) throws IOException {
-        ServerSide serverSide = ServerSide.getInstance();
-        serverSide.sendMessage(message);
+    public void send(String sender, String recipient, String message) throws IOException {
+        TextMessage mex = new TextMessage(sender, recipient, message);
+        server.sendMessage(mex);
     }
 }

@@ -1,43 +1,43 @@
 package Server;
 
-import Connection.Messages.GetChatRequestMessage;
-import Connection.Messages.LoginMessage;
+import Connection.Deserializer;
 import Connection.Messages.Message;
-import Connection.Messages.TextMessage;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MessageHandler implements Runnable {
-    private List<Message> messages;
-    private Controller controller;
+    private Server server;
+    private Socket socket;
 
-    public MessageHandler(Controller controller){
-        messages = new ArrayList<>();
-        this.controller = controller;
+    public MessageHandler(Server server, Socket socket) throws IOException {
+        this.server = server;
+        this.socket = socket;
     }
 
     public void run(){
-        while(true){
-            if(!messages.isEmpty()){
-                Message message = getMessage();
-                switch(message.getId()){
-                    case 0:
-                        try { controller.userManagement((LoginMessage) message); }
-                        catch (IOException e) { throw new RuntimeException(e); }
-                    case 2:
-                        try { controller.textMessageManagement((TextMessage) message); }
-                        catch (IOException e) { throw new RuntimeException(e); }
-                    case 3:
-                        try { controller.chatRequestManagement((GetChatRequestMessage) message); }
-                        catch (IOException e) { throw new RuntimeException(e); }
+        System.out.println("Created a message handler for: " + socket.getInetAddress().getHostName());
+        Deserializer deserializer = new Deserializer();
+        DataInputStream in;
+        try {
+            in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+            while(true) {
+                Message message;
+                try {
+                    message = deserializer.deserialize(in.readUTF());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
+                System.out.println("message: " + message);
+                System.out.println("message from " + message.getSender());
+                server.enqueueMessage(message);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
-
-    public synchronized void addMessage(Message message){ messages.add(message); }
-
-    private synchronized Message getMessage(){ return messages.removeFirst(); }
 }

@@ -1,5 +1,8 @@
 package Connection.Messages;
 
+import Server.Controller;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 /*
@@ -27,4 +30,6 @@ public abstract class Message {
     public int getId() { return id; }
 
     public String getRecipient() { return recipient; }
+
+    public void execute(Controller controller) throws IOException {}
 }
